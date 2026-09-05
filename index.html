@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Python Online</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+        }
+
+        textarea {
+            width: 100%;
+            height: 350px;
+            padding: 20px;
+            background: #020617;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            background: #22c55e;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        #output {
+            margin-top: 20px;
+            min-height: 100px;
+            padding: 20px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🐍 Python Online</h1>
+
+    <textarea id="code">print("Xin chào!")
+
+a = 10
+b = 20
+
+print("Tổng =", a + b)</textarea>
+
+    <br>
+
+    <button onclick="runPython()">▶ Chạy Python</button>
+
+    <div id="status">Đang tải Python...</div>
+
+    <div id="output"></div>
+
+</div>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+
+<script>
+
+let pyodide;
+
+async function loadPython() {
+
+    pyodide = await loadPyodide();
+
+    document.getElementById("status").innerText =
+        "✅ Python đã sẵn sàng!";
+
+}
+
+async function runPython() {
+
+    if (!pyodide) {
+        alert("Python đang tải, hãy đợi một chút!");
+        return;
+    }
+
+    const code = document.getElementById("code").value;
+    const output = document.getElementById("output");
+
+    output.innerText = "";
+
+    try {
+
+        // Chuyển output của print() vào biến
+        pyodide.runPython(`
+import sys
+from io import StringIO
+
+_output = StringIO()
+sys.stdout = _output
+sys.stderr = _output
+        `);
+
+        // Chạy code Python
+        pyodide.runPython(code);
+
+        // Lấy kết quả
+        const result = pyodide.runPython(`
+_output.getvalue()
+        `);
+
+        output.innerText = result;
+} catch (error) {
+
+        output.innerText =
+            "❌ LỖI PYTHON:\\n\\n" + error;
+
+    }
+}
+
+loadPython();
+
+</script>
+
+</body>
+</html>
